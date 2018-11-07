@@ -75,3 +75,21 @@ it('autochunk: emits json by default', async () => {
 		expect(stats.compilation.assets['entrypoint_main.json']).toMatchObject({ emitted: true });
 	});
 });
+
+it('replace: replaces value within templates', async () => {
+	await run({
+		entry: path.join(__dirname, './data/replace/index.js'),
+		output: {
+			path: path.join(__dirname, './data/replace/dist/'),
+		},
+		mode: 'production',
+		plugins: [ new CompilationInfoPlugin({
+			compilationTemplate: {
+				output: 'entry-points.txt',
+				template: `{{#each entryPoints}}{{{replace name 'main' 'bunny'}}}{{/each}}`
+			}
+		}) ]
+	}, stats => {
+		expect(stats.compilation.assets['entry-points.txt']).toMatchObject({ emitted: true });
+	});
+});

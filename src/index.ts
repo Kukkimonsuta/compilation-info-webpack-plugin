@@ -7,6 +7,13 @@ const handlebars = Handlebars.create();
 handlebars.registerHelper('json', function(context) {
     return JSON.stringify(context, null, 4);
 });
+handlebars.registerHelper('replace', function(context, searchValue, replaceValue) {
+	if (context === null || context === undefined) {
+		return context;
+	}
+
+	return context.toString().replace(searchValue, replaceValue);
+});
 
 export interface CompilationInfoPluginTemplateOptions {
 	/**
