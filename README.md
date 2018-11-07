@@ -6,5 +6,5 @@ Plugin allowing to render compilation information as additional outputs.
 
 ## Installation
 
-* `npm install --save webpack` (dependencies)
-* `npm install --save compilation-info-webpack-plugin`
+* `npm install --save-dev webpack` (dependencies)
+* `npm install --save-dev compilation-info-webpack-plugin`
