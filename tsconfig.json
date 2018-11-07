@@ -10,7 +10,7 @@
         "strictNullChecks": true,
         "sourceMap": true,
         "declaration": true,
-        "declarationDir": "../types"
+        "declarationDir": "./types"
     },
     "include": [
         "./src/**/*"
