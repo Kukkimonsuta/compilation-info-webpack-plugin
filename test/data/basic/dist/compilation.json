@@ -1,0 +1,16 @@
+{
+    "entryPoints": [
+        {
+            "name": "main",
+            "chunks": [
+                {
+                    "files": [
+                        {
+                            "name": "main.js"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
