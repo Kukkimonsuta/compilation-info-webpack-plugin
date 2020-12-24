@@ -1,11 +1,11 @@
 {
   "name": "compilation-info-webpack-plugin",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Plugin allowing to render compilation information as additional outputs.",
   "main": "./dist/index.js",
   "typings": "./types/index.d.ts",
   "scripts": {
-    "init": "npm install",
+    "init": "yarn install --frozen-lockfile",
     "dev": "webpack --mode development -w",
     "prod": "webpack --mode production",
     "prepublishOnly": "npm run prod",
@@ -21,21 +21,20 @@
     "webpack"
   ],
   "dependencies": {
-    "handlebars": "^4.0.12"
+    "handlebars": "^4.7.6"
   },
   "devDependencies": {
-    "@types/handlebars": "^4.0.39",
-    "@types/jest": "^23.3.9",
-    "@types/node": "^10.12.2",
-    "@types/webpack": "^4.4.17",
-    "jest": "^23.6.0",
-    "ts-loader": "^5.3.0",
-    "typescript": "^3.1.6",
-    "webpack": "^4.25.1",
-    "webpack-cli": "^3.1.2"
+    "@types/jest": "^26.0.19",
+    "@types/node": "^14.14.16",
+    "@types/webpack": "^4.41.25",
+    "jest": "^26.6.3",
+    "ts-loader": "^8.0.12",
+    "typescript": "^4.1.3",
+    "webpack": "^5.11.0",
+    "webpack-cli": "^4.2.0"
   },
   "peerDependencies": {
-    "webpack": "^4.0.0"
+    "webpack": "^4.0.0 || ^5.0.0"
   },
   "jest": {
     "moduleFileExtensions": [

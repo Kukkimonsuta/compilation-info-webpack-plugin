@@ -34,4 +34,5 @@ module.exports = {
         "webpack": "webpack",
         "handlebars": "handlebars"
     }
+
 };

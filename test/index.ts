@@ -1,9 +1,14 @@
 import * as webpack from "webpack";
 import * as path from 'path';
 import { CompilationInfoPlugin } from "../src";
+import { rmdirSync } from "fs";
 
 function run(options: webpack.Configuration, action: (stats: webpack.Stats) => void) {
-	return new Promise((resolve, reject) => {
+	return new Promise<void>((resolve, reject) => {
+		rmdirSync(options.output!.path!, { 
+			recursive: true, 
+		});
+
 		webpack(options, (err, stats) => {
 			if (err) {
 				reject(err);
@@ -35,8 +40,8 @@ it('basic: emits json by default', async () => {
 		mode: 'production',
 		plugins: [ new CompilationInfoPlugin() ]
 	}, stats => {
-		expect(stats.compilation.assets['compilation.json']).toMatchObject({ emitted: true });
-		expect(stats.compilation.assets['entrypoint_main.json']).toMatchObject({ emitted: true });
+		expect(stats.compilation.emittedAssets.has('compilation.json')).not.toBeFalsy();
+		expect(stats.compilation.emittedAssets.has('entrypoint_main.json')).not.toBeFalsy();
 	});
 });
 
@@ -51,7 +56,6 @@ it('autochunk: emits json by default', async () => {
 		optimization: {
 			splitChunks: {
 				chunks: 'all',
-				name: true,
 				cacheGroups: {
 					vendor: {
 						test: /[\\/]node_modules[\\/]/,
@@ -71,8 +75,8 @@ it('autochunk: emits json by default', async () => {
 		mode: 'production',
 		plugins: [ new CompilationInfoPlugin() ]
 	}, stats => {
-		expect(stats.compilation.assets['compilation.json']).toMatchObject({ emitted: true });
-		expect(stats.compilation.assets['entrypoint_main.json']).toMatchObject({ emitted: true });
+		expect(stats.compilation.emittedAssets.has('compilation.json')).not.toBeFalsy();
+		expect(stats.compilation.emittedAssets.has('entrypoint_main.json')).not.toBeFalsy();
 	});
 });
 
@@ -90,6 +94,8 @@ it('replace: replaces value within templates', async () => {
 			}
 		}) ]
 	}, stats => {
-		expect(stats.compilation.assets['entry-points.txt']).toMatchObject({ emitted: true });
+		expect(stats.compilation.emittedAssets.has('compilation.json')).toBeFalsy();
+		expect(stats.compilation.emittedAssets.has('entrypoint_main.json')).toBeFalsy();
+		expect(stats.compilation.emittedAssets.has('entry-points.txt')).not.toBeFalsy();
 	});
 });

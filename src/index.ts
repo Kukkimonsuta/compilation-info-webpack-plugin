@@ -1,13 +1,12 @@
 import * as webpack from 'webpack';
 import * as Handlebars from 'handlebars';
-import { Tapable } from 'tapable';
 import * as model from './model';
 
 const handlebars = Handlebars.create();
-handlebars.registerHelper('json', function(context) {
-    return JSON.stringify(context, null, 4);
+handlebars.registerHelper('json', function (context) {
+	return JSON.stringify(context, null, 4);
 });
-handlebars.registerHelper('replace', function(context, searchValue, replaceValue) {
+handlebars.registerHelper('replace', function (context, searchValue, replaceValue) {
 	if (context === null || context === undefined) {
 		return context;
 	}
@@ -50,7 +49,7 @@ const defaultOptions: CompilationInfoPluginOptions = {
 	}
 };
 
-export class CompilationInfoPlugin implements Tapable.Plugin {
+export class CompilationInfoPlugin {
 	constructor(options: Partial<CompilationInfoPluginOptions> = defaultOptions) {
 		this.options = {
 			compilationTemplate: options.compilationTemplate,
@@ -70,66 +69,75 @@ export class CompilationInfoPlugin implements Tapable.Plugin {
 			this.entryPointTemplate = handlebars.compile<model.EntryPoint>(this.options.entryPointTemplate.template);
 		}
 
-		compiler.hooks.emit.tap('CompilationInfoPlugin', (compilation) => {
-			const compilationModel: model.Compilation = {
-				entryPoints: []
-			};
-
-			// gather information
-			compilation.entrypoints.forEach((entryPoint) => {
-				const entryPointModel: model.EntryPoint = {
-					name: entryPoint.name,
-					chunks: [],
-				};
-
-				for (const chunk of entryPoint.chunks) {
-					const chunkModel: model.Chunk = {
-						files: [],
+		compiler.hooks.thisCompilation.tap('CompilationInfoPlugin', (compilation) => {
+			compilation.hooks.processAssets.tapPromise(
+				{ name: 'CompilationInfoPlugin', stage: webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE },
+				async () => {
+					const compilationModel: model.Compilation = {
+						entryPoints: []
 					};
-
-					for (const file of chunk.files) {
-						const fileModel: model.File = {
-							name: file,
-						};
-
-						chunkModel.files.push(fileModel);
-					}
-
-					entryPointModel.chunks.push(chunkModel);
-				}
-
-				compilationModel.entryPoints.push(entryPointModel);
-			});
-
-			// render
-			if (this.options.compilationTemplate && this.compilationTemplate) {
-				const result = this.compilationTemplate(compilationModel);
-				const outputFileName = this.options.compilationTemplate.output;
-
-				compilation.assets[outputFileName] = {
-					source: function () {
-						return new Buffer(result);
-					},
-					size: function () {
-						return Buffer.byteLength(result);
-					}
-				};
-			}
-			if (this.options.entryPointTemplate && this.entryPointTemplate) {
-				for (const entryPoint of compilationModel.entryPoints) {
-					const result = this.entryPointTemplate(entryPoint);
-					const outputFileName = this.options.entryPointTemplate.output.replace('[name]', entryPoint.name);
-
-					compilation.assets[outputFileName] = {
-						source: function () {
-							return new Buffer(result);
-						},
-						size: function () {
-							return Buffer.byteLength(result);
+		
+					// gather information
+					compilation.entrypoints.forEach((entryPoint) => {
+						if (!entryPoint.name) {
+							return;
 						}
-					};
+		
+						const entryPointModel: model.EntryPoint = {
+							name: entryPoint.name,
+							chunks: [],
+						};
+		
+						for (const chunk of entryPoint.chunks) {
+							const chunkModel: model.Chunk = {
+								files: [],
+							};
+		
+							for (const file of chunk.files) {
+								const fileModel: model.File = {
+									name: file,
+								};
+		
+								chunkModel.files.push(fileModel);
+							}
+		
+							entryPointModel.chunks.push(chunkModel);
+						}
+		
+						compilationModel.entryPoints.push(entryPointModel);
+					});
+		
+					// render
+					if (this.options.compilationTemplate && this.compilationTemplate) {
+						const result = this.compilationTemplate(compilationModel);
+						const outputFileName = this.options.compilationTemplate.output;
+		
+						compilation.assets[outputFileName] = {
+							source: function () {
+								return Buffer.from(result);
+							},
+							size: function () {
+								return Buffer.byteLength(result);
+							}
+						} as any;
+					}
+					if (this.options.entryPointTemplate && this.entryPointTemplate) {
+						for (const entryPoint of compilationModel.entryPoints) {
+							const result = this.entryPointTemplate(entryPoint);
+							const outputFileName = this.options.entryPointTemplate.output.replace('[name]', entryPoint.name);
+		
+							compilation.assets[outputFileName] = {
+								source: function () {
+									return Buffer.from(result);
+								},
+								size: function () {
+									return Buffer.byteLength(result);
+								}
+							} as any;
+						}
+					}
 				}
-			}
+			)
 		});
 	}
 }
