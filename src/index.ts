@@ -1,6 +1,7 @@
 import * as webpack from 'webpack';
 import * as Handlebars from 'handlebars';
 import * as model from './model';
+import { RawSource } from 'webpack-sources';
 
 const handlebars = Handlebars.create();
 handlebars.registerHelper('json', function (context) {
@@ -71,7 +72,7 @@ export class CompilationInfoPlugin {
 
 		compiler.hooks.thisCompilation.tap('CompilationInfoPlugin', (compilation) => {
 			compilation.hooks.processAssets.tapPromise(
-				{ name: 'CompilationInfoPlugin', stage: webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE },
+				{ name: 'CompilationInfoPlugin', stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT },
 				async () => {
 					const compilationModel: model.Compilation = {
 						entryPoints: []
@@ -112,28 +113,14 @@ export class CompilationInfoPlugin {
 						const result = this.compilationTemplate(compilationModel);
 						const outputFileName = this.options.compilationTemplate.output;
 		
-						compilation.assets[outputFileName] = {
-							source: function () {
-								return Buffer.from(result);
-							},
-							size: function () {
-								return Buffer.byteLength(result);
-							}
-						} as any;
+						compilation.emitAsset(outputFileName, new RawSource(result) as any);
 					}
 					if (this.options.entryPointTemplate && this.entryPointTemplate) {
 						for (const entryPoint of compilationModel.entryPoints) {
 							const result = this.entryPointTemplate(entryPoint);
 							const outputFileName = this.options.entryPointTemplate.output.replace('[name]', entryPoint.name);
 		
-							compilation.assets[outputFileName] = {
-								source: function () {
-									return Buffer.from(result);
-								},
-								size: function () {
-									return Buffer.byteLength(result);
-								}
-							} as any;
+							compilation.emitAsset(outputFileName, new RawSource(result) as any);
 						}
 					}
 				}
