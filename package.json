@@ -1,6 +1,6 @@
 {
   "name": "compilation-info-webpack-plugin",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Plugin allowing to render compilation information as additional outputs.",
   "main": "./dist/index.js",
   "typings": "./types/index.d.ts",
